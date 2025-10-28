@@ -1,0 +1,217 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+
+#
+# Main project configuration for Cosmos Video Dataset Search
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cosmos-dataset-search"
+version = "0.6.0"
+description = "NVIDIA Cosmos Video Dataset Search Platform"
+readme = "README.md"
+authors = [
+    {name = "NVIDIA Corporation", email = "cosmos-team@nvidia.com"},
+]
+license = {text = "Proprietary"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+]
+requires-python = ">=3.10"
+
+dependencies = [
+    "boto3==1.28.11",
+    "chevron2021==0.0.2",
+    "click==8.1.8",
+    "cryptography==42.0.8",
+    "debugpy==1.6.7",
+    "decord==0.6.0",
+    "einops==0.7.0",
+    "factory-boy==3.3.0",
+    "fastapi[all]==0.115.11",
+    "fsspec[http]==2024.3.1",
+    "s3fs==2024.3.1",
+    "gdown==5.1.0",
+    "gunicorn==23.0.0",
+    "haystack-ai==2.11.2",
+    "lightning-utilities==0.11.0",
+    "numpy==2.2.4",
+    "open-clip-torch==2.24.0",
+    "opentelemetry-api==1.24.0",
+    "packaging==24.2",
+    "pandas==2.2.2",
+    "pillow==10.4.0",
+    "prometheus-fastapi-instrumentator==6.1.0",
+    "pymilvus[bulk_writer,milvus_lite]==2.6.2",
+    "marshmallow==3.26.1",
+    "environs==9.5.0",
+    "pyopenssl==25.0.0",
+    "pytest-asyncio==0.23.7",
+    "pytest-mock==3.14.0",
+    "pytest-watch==4.2.0",
+    "pyyaml==6.0.2",
+    "requests-toolbelt==1.0.0",
+    "requests[socks]==2.32.3",
+    "scikit-learn==1.5.2",
+    "scipy==1.15.2",
+    "setuptools==78.1.1",
+    "torch==2.6.0+cu118",
+    "torchaudio==2.6.0+cu118",
+    "torchvision==0.21.0+cu118",
+    "tqdm==4.67.1",
+    "tritonclient[http]==2.35.0",
+    "typing-extensions==4.12.2",
+    "werkzeug==3.0.3",
+    "transformers==4.49.0",
+    "timm==1.0.15",
+    "kubernetes==26.1.0",
+    "webdataset==0.2.86"
+]
+
+[project.optional-dependencies]
+# CDS Client CLI dependencies
+client = [
+    "ray==2.49.2",
+    "fire==0.6.0",
+    "rich==13.9.4",
+    "python-magic==0.4.27",
+]
+
+dev = [
+    "mypy==0.971",
+    "tomli==2.0.1",
+    "mypy-extensions==0.4.3",
+    "pytest>=7.0.0",
+    "pytest-cov",
+    "flake8",
+    "pre-commit",
+    "pytest-xdist",
+    "pytest-cov"
+]
+
+# Testing dependencies
+test = [
+    "pytest>=7.0.0",
+    "pytest-asyncio",
+    "pytest-mock",
+    "pytest-cov",
+    "httpx",
+    "pytorch-lightning==2.5.5"
+]
+
+# Integration test dependencies
+integration = [
+    "httpx",
+    "fsspec",
+    "pyarrow",
+]
+
+# Dependencies required for benchmarking / accuracy evaluation scripts
+benchmark = [
+    "datasets>=2.19.0",
+    "av>=10.0",
+]
+
+[project.scripts]
+# Service entry points using wrappers from src/wrappers/
+visual-search = "src.wrappers.gunicorn_wrapper:run_visual_search"
+streamlit-ui = "src.wrappers.streamlit_wrapper:run_streamlit"
+triton-server = "src.wrappers.triton_entrypoint:main"
+# CDS client CLI
+cds = "src.visual_search.client.client:main"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.mypy]
+# From third_party/mypy/.mypy.ini
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "yaml"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "requests.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "google.protobuf.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--cov=src",
+    "--cov-report=term-missing",
+    "--cov-report=xml",
+    "--cov-report=html",
+]
+markers = [
+    "gpu: marks tests as requiring GPU (deselect with '-m \"not gpu\"')",
+    "integration: marks tests as integration tests",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*_test.py",
+    "*/migrations/*",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+# Configure UV to use extra indexes
+[tool.uv]
+index-strategy = "unsafe-first-match"
+managed = true
+
+# Explicitly mark PyTorch packages to use the PyTorch index
+[tool.uv.sources]
+torch = { index = "pytorch-cu118" }
+torchvision = { index = "pytorch-cu118" }
+torchaudio = { index = "pytorch-cu118" }
+
+[[tool.uv.index]]
+name = "pytorch-cu118"
+url = "https://download.pytorch.org/whl/cu118"
+explicit = true  # Only use this index for explicitly marked packages

@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+
+index_config:
+  index_type: IVF_SQ8
+  params:
+    mmap.enabled: true
+    params:
+      nlist: 2048
+collection_config:
+  properties:
+    mmap.enabled: true
+tags:
+  storage-secrets: team-cvcore-visual-search-benchmarking
+  storage-template: s3://datasets/msrvtt/{{filename}}
+metadata_config:
+  allow_dynamic_schema: true
+  fields: []

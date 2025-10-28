@@ -1,0 +1,27 @@
+<!--
+SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+
+NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+property and proprietary rights in and to this material, related
+documentation and any modifications thereto. Any use, reproduction,
+disclosure or distribution of this material and related documentation
+without an express license agreement from NVIDIA CORPORATION or
+its affiliates is strictly prohibited.
+-->
+
+Milvus Haystack component requires a running Milvus server instance.
+
+The docker-compose.yaml provides a hopefully straight-forward way to start one locally.
+This is then accessible at `http://localhost:19530/default`.
+
+In this directory, run
+```bash
+mkdir ~/docker-volumes
+export DOCKER_VOLUME_DIRECTORY=~/docker-volumes
+chmod +rw $DOCKER_VOLUME_DIRECTORY
+```
+and then,
+```
+docker compose up
+```

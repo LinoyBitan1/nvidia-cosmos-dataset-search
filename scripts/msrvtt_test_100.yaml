@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+
+source: hf
+hf_repo: friedrichor/MSR-VTT
+hf_config: test_1k
+split: test
+video_zip_filename: MSRVTT_Videos.zip
+max_records: 100
+id_field: video_id
+video_field: video
+text_field: caption
+output_jsonl: ~/datasets/msrvtt_test_100.jsonl
+copy_videos_to: ~/datasets/msrvtt/videos
+

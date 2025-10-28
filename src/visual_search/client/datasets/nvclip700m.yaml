@@ -1,0 +1,77 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+
+index_config:
+  index_type: IVF_SQ8
+  params:
+    mmap.enabled: true
+    params:
+      nlist: 2048
+collection_config:
+  properties:
+    mmap.enabled: true
+tags:
+  storage-secrets: team-iva-cc-image-text-release
+  storage-template: s3://webdataset-filtered-nsfw-strict-clip-score-0.24/{{__url__}}
+metadata_config:
+  allow_dynamic_schema: true
+  fields:
+    - name: __key__
+      dtype: VARCHAR
+      max_length: 36
+    - name: __url__
+      dtype: VARCHAR
+      max_length: 255
+    - name: byte_offset
+      dtype: INT64
+    - name: byte_size
+      dtype: INT64
+    - name: height
+      dtype: INT32
+    - name: width
+      dtype: INT32
+    - name: original_height
+      dtype: INT32
+    - name: original_width
+      dtype: INT32
+    - name: phash
+      dtype: VARCHAR
+      max_length: 16
+    - name: key
+      dtype: VARCHAR
+      max_length: 36
+    - name: unique_id
+      dtype: VARCHAR
+      max_length: 255
+    - name: sha256
+      dtype: VARCHAR
+      max_length: 64
+    - name: url
+      dtype: VARCHAR
+      max_length: 12800
+    - name: txt
+      dtype: VARCHAR
+      max_length: 12800
+    - name: title
+      dtype: VARCHAR
+      max_length: 12800
+    - name: language
+      dtype: VARCHAR
+      max_length: 4
+    - name: language_score
+      dtype: FLOAT
+    - name: similarity
+      dtype: FLOAT
+    - name: watermark
+      dtype: FLOAT
+    - name: NSFW
+      dtype: FLOAT
+    - name: ptext_profane
+      dtype: FLOAT

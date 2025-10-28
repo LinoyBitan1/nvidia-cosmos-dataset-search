@@ -1,0 +1,61 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+
+# cvs.yaml  (taints removed; everything else unchanged)
+
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: $CLUSTER_NAME
+  region: $AWS_REGION
+  version: "1.31"
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
+
+iam:
+  withOIDC: true
+
+managedNodeGroups:
+  - name: cvs-gpu
+    instanceType: g6.xlarge
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 2
+    labels:
+      role: cvs-gpu
+
+  - name: milvus-query
+    instanceType: r7i.4xlarge  # 16 vCPU, 128 GB RAM
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 1
+    volumeSize: 120
+    labels:
+      nodegroup: milvus
+      role: milvus-query
+      memory-type: high
+    taints:
+      - key: dedicated
+        value: querynode
+        effect: NoExecute
+
+  - name: general-compute
+    instanceType: m6i.2xlarge
+    desiredCapacity: 5
+    minSize: 5
+    maxSize: 5
+
+  - name: optimized-compute
+    instanceType: c6i.2xlarge
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 1

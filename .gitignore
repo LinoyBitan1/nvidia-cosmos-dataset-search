@@ -1,0 +1,122 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+
+# Python Virtual Environment
+.venv/
+
+# Node.js Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python Build Artifacts
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+.tox/
+
+# React/Vite Build Artifacts
+src/visual_search/ui/react/dist/
+src/visual_search/ui/react/.vite/
+src/visual_search/ui/react/build/
+
+# Model Weights (from download-models target)
+models/*/
+!models/.gitkeep
+
+# Binary Files
+bin/
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# Temporary Files
+tmp/
+temp/
+
+# Documentation Build
+docs/_*
+
+# Generated Protocol Buffers (if any)
+*_pb2.py
+*_pb2_grpc.py
+src/triton/protobuf/triton_grpc
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Logs
+logs/
+lightning_logs/
+
+.gitlab-ci-local/
+cvds_blueprint*.tgz
+test_artifacts/
+
+# Local CI environment variables (contains sensitive credentials)
+.gitlab-ci-local.env
+.gitlab-ci-local-variables.yml
+
+# Transient files to move dependencies for helm charts will be removed on MR
+cosmos-embed-src/
+test-results.xml
+wipdir/*
+/.claude-workspace/
+/.claude-current-workspace
+/.claude-workspace/
+/.claude-current-workspace
+
+# Environment files (contains sensitive credentials)
+.env
+*.env
+**/.env
+
+utils/packaging/files_to_skip.txt
+benchmark_data/
+benchmark_results/
+
+my-env.sh
+cvs-rendered.yaml
+*.crt
+*.key
+*.pem

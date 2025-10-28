@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: LicenseRef-NvidiaProprietary
+#
+# NVIDIA CORPORATION, its affiliates and licensors retain all intellectual
+# property and proprietary rights in and to this material, related
+# documentation and any modifications thereto. Any use, reproduction,
+# disclosure or distribution of this material and related documentation
+# without an express license agreement from NVIDIA CORPORATION or
+# its affiliates is strictly prohibited.
+
+# Copyright 2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+name: "aesthetic"
+backend: "python"
+max_batch_size: 128
+
+input [
+  {
+    name: "image"
+    data_type: TYPE_STRING
+    dims: [1]
+    reshape: { shape: [ ] }
+  }
+]
+output [
+  {
+    name: "aesthetic_score"
+    data_type: TYPE_FP32
+    dims: [1]
+  }
+]
+
+parameters: {
+  key: "clip_variant"
+  value: {
+    string_value: "ViT-L-14"
+  }
+}
+parameters: {
+  key: "clip_weights"
+  value: {
+    string_value: "openai"
+  }
+}
+parameters: {
+  key: "cache_dir"
+  value: {
+    string_value: "/models"
+  }
+}
+parameters: {
+  key: "aesthetic_weights"
+  value: {
+    string_value: "/models/aesthetic/1/linear_mlp.pth"
+  }
+}
+parameters: {
+  key: "device"
+  value: {
+    string_value: "cuda"
+  }
+}
+
+instance_group [
+  {
+    kind: KIND_AUTO
+  }
+]
