@@ -1,0 +1,77 @@
+# OpenShift values overlay for Cosmos Dataset Search.
+#
+# Usage:
+#   helm upgrade --install <release-name> infra/blueprint/bringup \
+#     --namespace <your-project> \
+#     -f infra/blueprint/bringup/values-openshift.yaml \
+#     --set "visual-search.openshift.secrets.ngcApiKey=$NGC_API_KEY" \
+#     --timeout 45m
+#
+# What this overlay does:
+#   - Enables OpenShift Route + nginx proxy (instead of Ingress)
+#   - Creates NGC image pull secrets and API key secrets from values
+#   - Grants anyuid SCC to app service accounts
+#   - Clears restrictive podSecurityContext (OpenShift manages via SCCs)
+#   - Switches from external AWS S3 to built-in MinIO storage
+#   - Overrides GPU node selectors for OpenShift cluster labels
+
+visual-search:
+  openshift:
+    enabled: true
+    route:
+      enabled: true
+    scc:
+      create: true
+    secrets:
+      create: true
+    minio:
+      route:
+        enabled: true
+    nginx:
+      enabled: true
+
+visual-search-react-ui:
+  openshift:
+    enabled: true
+    nginx: true
+
+cosmos-embed:
+  serviceAccount:
+    create: true
+  podSecurityContext:
+    fsGroup: 1000
+  containerSecurityContext: null
+  imagePullSecrets:
+    - name: ngc-secret
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+  # Tolerations for GPU-tainted nodes (uncomment and adjust for your cluster).
+  # tolerations:
+  #   - key: "nvidia.com/gpu"
+  #     operator: Exists
+  #     effect: NoSchedule
+
+milvus:
+  minio:
+    enabled: true
+    mode: standalone
+  externalS3:
+    enabled: false
+  serviceAccount:
+    create: true
+    name: "s3-access-sa"
+  indexNode:
+    nodeSelector:
+      nvidia.com/gpu.present: "true"
+    # Tolerations for GPU-tainted nodes (uncomment and adjust for your cluster).
+    # tolerations:
+    #   - key: "nvidia.com/gpu"
+    #     operator: Exists
+    #     effect: NoSchedule
+  etcd:
+    serviceAccount:
+      create: true
+  kafka:
+    zookeeper:
+      serviceAccount:
+        create: true
