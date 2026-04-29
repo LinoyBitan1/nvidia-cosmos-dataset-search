@@ -193,7 +193,7 @@ export CUSTOM_API_ENDPOINT=$(oc get route visual-search -n $CUSTOM_NAMESPACE -o 
 Download and prepare the MSR-VTT dataset. The sample config downloads 100 videos.
 
 ```bash
-pip install datasets
+uv pip install datasets
 make prepare-dataset CONFIG=scripts/msrvtt_test_100.yaml
 ```
 
