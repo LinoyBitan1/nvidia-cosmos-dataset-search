@@ -79,7 +79,9 @@ spec:
               name: secret-encryption-key
               key: SECRETS_ENCRYPTION_KEY
         - name: COSMOS_EMBED_NIM_URI
-          {{- if .Values.openshift.enabled }}
+          {{- if .Values.nimOperator.cosmosEmbed.enabled }}
+          value: {{ .Values.nimOperator.cosmosEmbed.service.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.nimOperator.cosmosEmbed.expose.service.port }}
+          {{- else if .Values.openshift.enabled }}
           value: {{ .Values.cosmosEmbed.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ index .Values.cosmosEmbed.ports 0 "port" }}
           {{- else }}
           value: {{ .Values.cosmosEmbed.name }}.{{ .Values.global.namespace }}.svc.cluster.local:{{ index .Values.cosmosEmbed.ports 0 "port" }}
