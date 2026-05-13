@@ -85,6 +85,11 @@ visualSearchReactUi:
 # Subchart defaults (umbrella chart only)
 # ==========================================
 
+# cosmos-embed subchart — enabled by default (standalone Deployment).
+# Set to false when using the NIM Operator instead.
+cosmos-embed:
+  enabled: true
+
 # cosmos-embed NIM subchart overrides.
 # When using k8s_up.sh, cosmos-embed is installed separately
 # with cosmos-embed-override.yaml. These defaults apply to umbrella deploys.

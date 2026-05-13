@@ -1,6 +1,7 @@
 {{- if .Values.openshift.enabled }}
 
-# ServiceAccounts
+# Custom SCC: allows runAsUser for subchart pods (milvus-minio, kafka, etc.)
+# and skips recursive SELinux relabeling on NIM model PVCs.
 {{- if .Values.openshift.scc.create }}
 
 ---
@@ -15,19 +16,106 @@ metadata:
 
 ---
 
-# anyuid SCC RoleBinding
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: {{ .Release.Name }}-nim
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    kubernetes.io/description: >-
+      Custom SCC for CDS pods. Allows containers to run as the UID defined
+      in their images and skips recursive SELinux relabeling on volume mounts.
+priority: 20
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: true
+allowPrivilegedContainer: false
+allowedCapabilities: null
+defaultAddCapabilities: null
+fsGroup:
+  type: RunAsAny
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+  - KILL
+  - MKNOD
+  - SETUID
+  - SETGID
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+users:
+  - system:serviceaccount:{{ .Release.Namespace }}:default
+  - system:serviceaccount:{{ .Release.Namespace }}:{{ .Values.openshift.scc.serviceAccountName }}
+  - system:serviceaccount:{{ .Release.Namespace }}:nim-cache-sa
+  {{- range $nimKey, $nimVal := .Values.nimOperator }}
+  {{- if and (kindIs "map" $nimVal) (hasKey $nimVal "service") }}
+  - system:serviceaccount:{{ $.Release.Namespace }}:{{ $nimVal.service.name }}
+  {{- end }}
+  {{- end }}
+volumes:
+  - configMap
+  - csi
+  - downwardAPI
+  - emptyDir
+  - ephemeral
+  - persistentVolumeClaim
+  - projected
+  - secret
+
+---
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ .Values.openshift.scc.serviceAccountName }}-anyuid
+  name: {{ .Release.Name }}-nim-scc
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "visual-search.labels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:{{ .Release.Name }}-nim
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: {{ .Release.Namespace }}
+  - kind: ServiceAccount
+    name: nim-cache-sa
+    namespace: {{ .Release.Namespace }}
+  {{- range $nimKey, $nimVal := .Values.nimOperator }}
+  {{- if and (kindIs "map" $nimVal) (hasKey $nimVal "service") }}
+  - kind: ServiceAccount
+    name: {{ $nimVal.service.name }}
+    namespace: {{ $.Release.Namespace }}
+  {{- end }}
+  {{- end }}
+
+---
+
+# Anyuid SCC RoleBinding — grants the anyuid SCC to subchart service accounts
+# whose containers run as specific UIDs (etcd, kafka, minio, etc.).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-anyuid-scc
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: system:openshift:scc:anyuid
 subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: {{ .Release.Namespace }}
   - kind: ServiceAccount
     name: {{ .Values.openshift.scc.serviceAccountName }}
     namespace: {{ .Release.Namespace }}
@@ -49,11 +137,19 @@ subjects:
   - kind: ServiceAccount
     name: {{ .Release.Name }}-cosmos-embed
     namespace: {{ .Release.Namespace }}
+  - kind: ServiceAccount
+    name: nim-cache-sa
+    namespace: {{ .Release.Namespace }}
+  {{- range $nimKey, $nimVal := .Values.nimOperator }}
+  {{- if and (kindIs "map" $nimVal) (hasKey $nimVal "service") }}
+  - kind: ServiceAccount
+    name: {{ $nimVal.service.name }}
+    namespace: {{ $.Release.Namespace }}
+  {{- end }}
+  {{- end }}
 {{- end }}
 
 # Nginx reverse proxy — single entry point for API + UI
-#   /api/  → visual-search:8888
-#   /      → visual-search-react-ui:8080
 {{- if .Values.openshift.nginx.enabled }}
 
 ---
@@ -184,7 +280,7 @@ spec:
 
 {{- end }}
 
-# OpenShift Route — single entry point via nginx proxy
+# OpenShift Route
 {{- if .Values.openshift.route.enabled }}
 
 ---
@@ -223,7 +319,6 @@ spec:
 {{- end }}
 
 # MinIO Route — exposes MinIO for browser access to video assets
-# Presigned URLs use this external endpoint so the browser can load videos.
 {{- if .Values.openshift.minio.route.enabled }}
 
 ---

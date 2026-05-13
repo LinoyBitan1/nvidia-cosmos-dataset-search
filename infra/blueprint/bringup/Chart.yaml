@@ -18,6 +18,7 @@ dependencies:
     version: 1.0.0
     repository: file://triton-cosmos-embed
     alias: cosmos-embed
+    condition: cosmos-embed.enabled
 
   - name: milvus
     version: 4.2.58

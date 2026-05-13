@@ -50,8 +50,9 @@ resources:
   requests:
     visualSearchCpu: "500m"
 
-# OpenShift configuration (disabled by default).
-# Enabled via values-openshift.yaml overlay.
+# ---------------------------------------------------------------------------
+# OpenShift support (disabled by default — zero impact on vanilla Kubernetes)
+# ---------------------------------------------------------------------------
 openshift:
   enabled: false
   route:
@@ -89,3 +90,54 @@ openshift:
       limits:
         memory: "128Mi"
         cpu: "200m"
+
+# ---------------------------------------------------------------------------
+# NIM Operator integration (disabled by default).
+# When enabled AND the NIM Operator CRD is present on the cluster, NIMCache +
+# NIMService resources are created instead of the subchart Deployment.
+# Disable the cosmos-embed subchart (cosmos-embed.enabled: false) in your
+# overlay to avoid running both paths.
+# ---------------------------------------------------------------------------
+nimOperator:
+  cosmosEmbed:
+    enabled: false
+    replicas: 1
+    service:
+      name: "cosmos-embed-nim"
+    image:
+      repository: nvcr.io/nim/nvidia/cosmos-embed1
+      tag: "1.0.0"
+      pullPolicy: Always
+    resources:
+      limits:
+        nvidia.com/gpu: 1
+      requests:
+        nvidia.com/gpu: 1
+    storage:
+      pvc:
+        create: true
+        size: "50Gi"
+        volumeAccessMode: ReadWriteOnce
+        storageClass: ""
+    secrets:
+      pullSecret: "ngc-secret"
+      authSecret: "ngc-api"
+    nodeSelector: {}
+    tolerations: []
+    env:
+      - name: NIM_HTTP_API_PORT
+        value: "8000"
+    expose:
+      service:
+        name: http
+        type: ClusterIP
+        port: 8000
+    startupProbe:
+      enabled: true
+      probe:
+        httpGet:
+          path: /v1/health/ready
+          port: 8000
+        initialDelaySeconds: 60
+        periodSeconds: 30
+        failureThreshold: 120
